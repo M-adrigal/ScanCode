@@ -79,6 +79,16 @@ powershell -ExecutionPolicy Bypass -File windows/build.ps1
 
 Windows 没有 macOS 的屏幕录制 TCC 权限，不需要授权弹窗；未签名 exe 首次运行可能被 SmartScreen 拦截，右键运行即可。
 
+## 诊断日志
+
+运行日志：
+
+```text
+%LOCALAPPDATA%\ScanCode\ScanCode.log
+```
+
+只记录事件（启动、截屏、二维码数量、匹配应用、唤醒结果），不记录二维码内容。
+
 ## 已知限制
 
 - P0 用 GDI 截屏，硬件加速/受保护内容可能黑屏；后续换 WGC。
