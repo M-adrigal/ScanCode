@@ -18,7 +18,8 @@ public static partial class ContentParser
 
     public static QrPayload Parse(string raw)
     {
-        var text = (raw ?? string.Empty).Trim();
+        raw ??= string.Empty;
+        var text = raw.Trim();
         if (text.Length == 0)
         {
             return new QrPayload(string.Empty, string.Empty, Provider.Text, "文本内容", "空内容", null, string.Empty);
