@@ -11,9 +11,10 @@ internal static class AppIcon
         {
             var path = Path.Combine(AppContext.BaseDirectory, "Assets", "AppIcon.ico");
             if (!File.Exists(path)) return new DrawingImage();
+            using var stream = File.OpenRead(path);
             var image = new BitmapImage();
             image.BeginInit();
-            image.UriSource = new Uri(path);
+            image.StreamSource = stream;
             image.CacheOption = BitmapCacheOption.OnLoad;
             image.EndInit();
             image.Freeze();
