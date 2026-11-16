@@ -231,7 +231,10 @@ public sealed class OverlayWindow : Window
             _selectionDip.Y * scale,
             _selectionDip.Width * scale,
             _selectionDip.Height * scale);
-        Dispatcher.BeginInvoke(new Action(() => SelectionConfirmed?.Invoke(Monitor, pixels)));
+        Dispatcher.BeginInvoke(new Action(() =>
+        {
+            if (IsVisible) SelectionConfirmed?.Invoke(Monitor, pixels);
+        }));
     }
 
     public void ShowHotspots(IReadOnlyList<DecodedQr> spots)
@@ -274,7 +277,10 @@ public sealed class OverlayWindow : Window
             button.Click += (_, _) =>
             {
                 foreach (var other in _hotspotButtons) other.IsEnabled = false;
-                Dispatcher.BeginInvoke(new Action(() => HotspotSelected?.Invoke(spot)));
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    if (IsVisible) HotspotSelected?.Invoke(spot);
+                }));
             };
             Canvas.SetLeft(button, rect.X);
             Canvas.SetTop(button, rect.Y);
