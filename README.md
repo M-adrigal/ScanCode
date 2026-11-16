@@ -22,7 +22,7 @@ PC 网页上出现网盘二维码时，按 `⌃⌥Q` 框选 → 本地解析 →
 
 ### 屏幕录制授权不生效？
 
-macOS 会把授权记录绑在 App 的身份上，删掉 App 不会自动删掉旧记录。0.1.5 在每次未授权启动时会先执行
+macOS 会把授权记录绑在 App 的身份上，删掉 App 不会自动删掉旧记录。0.1.6 在每次未授权启动时会先执行
 `tccutil reset ScreenCapture com.yuanye.scancode` 清理旧记录，再重新请求系统授权。
 
 App 启动时会做一次实际截屏自检；如果开关看起来是开的但截屏失败，会自动清理旧授权并重新请求。
@@ -45,8 +45,10 @@ App 启动时会做一次实际截屏自检；如果开关看起来是开的但�
 ## 当前状态
 
 - **macOS P0 可运行**
+- **Windows P0 源码已加入**（C# / .NET 10 / WPF），待在 Windows 上编译验收
 - 安装包（DMG / zip）见 [GitHub Releases](https://github.com/M-adrigal/ScanCode/releases/latest)
-- 源码与开发说明：[macos/README.md](macos/README.md)
+- macOS 源码与开发说明：[macos/README.md](macos/README.md)
+- Windows 源码与构建说明：[windows/README.md](windows/README.md)
 
 ## 三条约束
 
@@ -56,7 +58,7 @@ App 启动时会做一次实际截屏自检；如果开关看起来是开的但�
 
 ## 已确认
 
-- 平台：macOS 14+；Windows 10 22H2 + Windows 11
+- 平台：macOS 14+；Windows 10 22H2 + Windows 11（x64）
 - 顺序：macOS 先，Windows 后
 - 分发：自用/开源，不强制签名；Windows 可申请 SignPath Foundation 免费签名
 - 冷启动：留扩展位，v1 不启用、UI 不露出
@@ -76,6 +78,15 @@ cd macos
 ./make-dmg.sh
 ```
 
+Windows（在 Windows 10/11 + .NET 10 SDK 上）：
+
+```powershell
+dotnet build windows/ScanCode.Windows.sln -c Release
+dotnet run --project windows/src/ScanCode.App/ScanCode.App.csproj
+```
+
+详细说明见 [windows/README.md](windows/README.md)。
+
 > 源码仓库不提交 DMG；发布包放在 GitHub Releases。`make-dmg.sh` 需要调用 `hdiutil`，如果终端没有磁盘映像权限，可能需要在系统设置里放行终端。
 > 本机已验证真实屏幕捕获、遮罩、框选、解码、结果条；物理热键/鼠标操作和真实应用唤起需要你手动试一次。
 
@@ -83,7 +94,7 @@ cd macos
 
 1. 你手动验收物理热键、框选、百度/夸克唤起；
 2. P1：设置页、快捷键录制、首次引导、放大镜/多码；
-3. Windows 版按契约实现（百度 L1、夸克 L1.5）。
+3. Windows P0 已加入 `windows/`，需在 Windows 上构建验收（百度 L1、夸克 L1.5）。
 
 ## License
 

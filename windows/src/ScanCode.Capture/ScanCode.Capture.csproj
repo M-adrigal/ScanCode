@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <RootNamespace>ScanCode.Capture</RootNamespace>
+    <AssemblyName>ScanCode.Capture</AssemblyName>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Drawing.Common" Version="10.0.0" />
+    <ProjectReference Include="..\ScanCode.Core\ScanCode.Core.csproj" />
+    <ProjectReference Include="..\ScanCode.Interop\ScanCode.Interop.csproj" />
+  </ItemGroup>
+</Project>

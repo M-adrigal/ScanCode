@@ -128,7 +128,7 @@ open "macos/build/ScanCode.app"
 - 夸克 macOS 走 `NSWorkspace.open` 直达；Windows 版后续实现 L1.5；
 - 物理热键/鼠标的真人操作未在自动化环境中验证（CGEvent 注入受辅助功能权限限制）；
 - 屏幕录制权限、ad-hoc 签名重编译后的 TCC 重置需要手动处理；
-- Windows 版本尚未开始（按确认：macOS 先）。
+- Windows P0 源码已加入 [`../windows/`](../windows/)，需在 Windows 上构建验收。
 
 ## 目录
 

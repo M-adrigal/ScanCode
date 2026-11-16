@@ -1,3 +1,13 @@
 .build/
 macos/build/
 .DS_Store
+
+# Windows build output
+windows/**/bin/
+windows/**/obj/
+windows/dist/
+*.user
+TestResults/
+windows/*.zip
+windows/*.dmg
+windows/*.exe
