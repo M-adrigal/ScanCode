@@ -26,6 +26,7 @@ public sealed class AppController : IDisposable
 
     public void Start()
     {
+        Log.Write("app: start");
         _tray = new TrayController();
         _tray.OpenRequested += ShowWelcome;
         _tray.StartRequested += BeginCapture;
@@ -37,6 +38,7 @@ public sealed class AppController : IDisposable
         {
             if (!_hotkey.Register())
             {
+                Log.Write("hotkey: register failed");
                 Alerts.Info("全局快捷键 Ctrl+Alt+Q 注册失败，可能被其他程序占用。\n仍可以从托盘菜单开始识别。");
             }
         }
@@ -71,6 +73,7 @@ public sealed class AppController : IDisposable
     private void BeginCapture()
     {
         if (_capturing || _disposed) return;
+        Log.Write("capture: begin");
         CloseResult();
         CloseOverlay();
         _capturing = true;
@@ -89,6 +92,7 @@ public sealed class AppController : IDisposable
         catch (Exception ex)
         {
             _capturing = false;
+            Log.Write($"capture: failed {ex}");
             Alerts.CaptureFailed(ex.Message);
         }
     }
@@ -97,6 +101,7 @@ public sealed class AppController : IDisposable
     {
         _lastMonitor = monitor;
         _lastSelection = rect;
+        Log.Write($"selection: {rect}");
 
         IReadOnlyList<DecodedQr> decoded;
         try
@@ -110,6 +115,7 @@ public sealed class AppController : IDisposable
             return;
         }
 
+        Log.Write($"decode: count={decoded.Count}");
         if (decoded.Count == 0)
         {
             CloseOverlay();
@@ -136,6 +142,7 @@ public sealed class AppController : IDisposable
     private void ShowPayload(CapturedMonitor monitor, PixelRect anchor, string raw)
     {
         var payload = ContentParser.Parse(raw);
+        Log.Write($"payload: provider={payload.Provider} code={!string.IsNullOrWhiteSpace(payload.ExtractCode)}");
         CloseOverlay();
         CloseResult();
 
@@ -161,16 +168,19 @@ public sealed class AppController : IDisposable
     {
         try
         {
+            Log.Write($"dispatch: {app.Id}");
             var message = _dispatcher.Dispatch(payload, app);
             CloseResult();
             ShowHud(message);
         }
         catch (DispatchException ex)
         {
+            Log.Write($"dispatch: failed {ex.Message}");
             Alerts.DispatchFailed(ex.Message);
         }
         catch (Exception ex)
         {
+            Log.Write($"dispatch: exception {ex}");
             Alerts.DispatchFailed($"唤起失败：{ex.Message}");
         }
     }

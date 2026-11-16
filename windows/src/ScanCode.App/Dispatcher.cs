@@ -22,9 +22,11 @@ public sealed class Dispatcher
         using var running = _registry.FindRunning(app);
         if (running == null)
         {
+            Log.Write($"dispatch: {app.Id} not running");
             throw new DispatchException($"先打开{app.DisplayName}，再试一次。");
         }
 
+        Log.Write($"dispatch: {app.Id} clipboard+activate");
         ClipboardService.SetText(payload.ClipboardText);
         if (!_registry.Activate(app, running))
         {

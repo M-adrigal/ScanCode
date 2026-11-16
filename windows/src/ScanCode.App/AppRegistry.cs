@@ -66,6 +66,7 @@ public sealed class AppRegistry
             hwnd = WindowActivator.FindMainWindow((uint)process.Id);
         }
 
+        Log.Write($"activate: {app.Id} hwnd={(hwnd == IntPtr.Zero ? "0" : "ok")}");
         if (hwnd == IntPtr.Zero)
         {
             // The client may be alive only in the tray. Starting the already-running exe
@@ -76,6 +77,7 @@ public sealed class AppRegistry
             {
                 try
                 {
+                    Log.Write($"activate: reopen {app.Id}");
                     Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
                     Thread.Sleep(900);
                     process.Refresh();
@@ -92,7 +94,9 @@ public sealed class AppRegistry
             }
         }
 
-        return hwnd != IntPtr.Zero && WindowActivator.Activate(hwnd);
+        var activated = hwnd != IntPtr.Zero && WindowActivator.Activate(hwnd);
+        Log.Write($"activate: {app.Id} result={activated}");
+        return activated;
     }
 
     /// <summary>Quark L1.5: after activation, focus its address bar and paste the copied link.</summary>

@@ -7,6 +7,8 @@ public static class Program
     [STAThread]
     public static void Main()
     {
+        Log.Write($"starting {Environment.OSVersion} dotnet={Environment.Version}");
+
         var application = new Application
         {
             ShutdownMode = ShutdownMode.OnExplicitShutdown

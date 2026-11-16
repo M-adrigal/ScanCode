@@ -32,6 +32,7 @@ public sealed class HotkeyService : IDisposable
             NativeMethods.ModControl | NativeMethods.ModAlt | NativeMethods.ModNoRepeat,
             NativeMethods.VkQ);
 
+        Log.Write($"hotkey: register result={ok}");
         if (!ok)
         {
             _source.RemoveHook(WndProc);
