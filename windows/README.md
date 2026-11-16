@@ -18,6 +18,15 @@ macOS 版在 [`../macos/`](../macos/)；两端共用产品规则，不共享运�
 - 客户端只剩托盘图标时，尝试让其重开主窗口；
 - 普通网页/文本二维码显示完整地址，只提供复制链接。
 
+## 验证状态
+
+- 2026-11-16，macOS + .NET SDK 10.0.100：
+  - `ScanCode.Core` 编译通过，0 警告/0 错误；
+  - `ScanCode.Interop` 编译通过，0 警告/0 错误；
+  - Core 解析 smoke test 通过（百度/夸克/提取码/普通网页/文本）；
+  - 全部 C# 文件通过 tree-sitter 语法解析，0 语法错误。
+- `ScanCode.Capture` / `ScanCode.App` 需要 WindowsDesktop/WinForms/WPF 参考包，**尚未在 Windows 上编译**。
+
 ## 环境
 
 - Windows 10 22H2 或 Windows 11，x64；
