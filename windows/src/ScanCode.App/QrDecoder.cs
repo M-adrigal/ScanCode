@@ -39,7 +39,8 @@ public static class QrDecoder
         var seen = new HashSet<string>(StringComparer.Ordinal);
         foreach (var result in results)
         {
-            var raw = result?.Text;
+            if (result is null) continue;
+            var raw = result.Text;
             if (string.IsNullOrWhiteSpace(raw) || !seen.Add(raw)) continue;
 
             var points = result.ResultPoints ?? Array.Empty<ResultPoint>();
