@@ -46,7 +46,7 @@ public static class ScreenCaptureService
 
     private static CapturedMonitor Capture(Rectangle bounds)
     {
-        using var bitmap = new Bitmap(bounds.Width, bounds.Height, PixelFormat.Format32bppArgb);
+        using var bitmap = new Bitmap(bounds.Width, bounds.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
         using (var graphics = Graphics.FromImage(bitmap))
         {
             graphics.CopyFromScreen(
@@ -61,7 +61,7 @@ public static class ScreenCaptureService
         var data = bitmap.LockBits(
             new Rectangle(0, 0, bounds.Width, bounds.Height),
             ImageLockMode.ReadOnly,
-            PixelFormat.Format32bppArgb);
+            System.Drawing.Imaging.PixelFormat.Format32bppArgb);
         try
         {
             var stride = data.Stride;
