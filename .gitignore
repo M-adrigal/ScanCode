@@ -11,3 +11,6 @@ TestResults/
 windows/*.zip
 windows/*.dmg
 windows/*.exe
+
+# Local VM handoff archive
+/ScanCode-source.zip
