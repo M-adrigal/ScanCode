@@ -2,7 +2,7 @@
 
 PC 网页上出现网盘二维码时，按 `⌃⌥Q`（Windows 为 `Ctrl+Alt+Q`）框选 → 本地解析 → 唤起**已经打开**的百度网盘/夸克 → 保存由你在官方客户端里完成。
 
-## macOS：直接打开（推荐，不需要命令行）
+## macOS：直接打开
 
 1. 打开 [GitHub Releases](https://github.com/M-adrigal/ScanCode/releases/latest) 下载 DMG
 2. 把「扫码助手」拖到 **Applications**
