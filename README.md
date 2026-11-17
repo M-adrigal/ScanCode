@@ -1,8 +1,8 @@
 # 扫码助手（工作名 ScanCode）
 
-PC 网页上出现网盘二维码时，按 `⌃⌥Q` 框选 → 本地解析 → 唤起**已经打开**的百度网盘/夸克 → 保存由你在官方客户端里完成。
+PC 网页上出现网盘二维码时，按 `⌃⌥Q`（Windows 为 `Ctrl+Alt+Q`）框选 → 本地解析 → 唤起**已经打开**的百度网盘/夸克 → 保存由你在官方客户端里完成。
 
-## 直接打开（推荐，不需要命令行）
+## macOS：直接打开（推荐，不需要命令行）
 
 1. 打开 [GitHub Releases](https://github.com/M-adrigal/ScanCode/releases/latest) 下载 DMG
 2. 把「扫码助手」拖到 **Applications**
@@ -42,11 +42,21 @@ App 启动时会做一次实际截屏自检；如果开关看起来是开的但�
 
 ![普通链接](assets/p0/panel-web.png)
 
+## Windows：直接打开
+
+1. 打开 [GitHub Releases](https://github.com/M-adrigal/ScanCode/releases/latest) 下载 `ScanCode-win-x64.zip`
+2. 解压后双击 `ScanCode.exe`，自带 .NET 运行时，不需要另装东西
+   （Windows 10 22H2+ / Windows 11，x64）
+3. 如果弹出「Windows 已保护你的电脑」：点「更多信息」→「仍要运行」（exe 未签名，属正常现象）
+4. **先手动打开百度网盘 / 夸克**，按 `Ctrl+Alt+Q` 框选二维码，点「解析二维码」，再点应用按钮
+
+构建方法、常见问题与已知限制见 [windows/README.md](windows/README.md)。
+
 ## 当前状态
 
-- **macOS P0 可运行**
-- **Windows P0 源码已加入**（C# / .NET 10 / WPF），待在 Windows 上编译验收
-- 安装包（DMG / zip）见 [GitHub Releases](https://github.com/M-adrigal/ScanCode/releases/latest)
+- **macOS v0.1.6 已发布**（DMG）
+- **Windows v0.1.6 已发布**（`ScanCode-win-x64.zip`，源码在 `windows/`，C# / .NET 10 / WPF）
+- 安装包见 [GitHub Releases](https://github.com/M-adrigal/ScanCode/releases/latest)
 - macOS 源码与开发说明：[macos/README.md](macos/README.md)
 - Windows 源码与构建说明：[windows/README.md](windows/README.md)
 
@@ -59,7 +69,6 @@ App 启动时会做一次实际截屏自检；如果开关看起来是开的但�
 ## 已确认
 
 - 平台：macOS 14+；Windows 10 22H2 + Windows 11（x64）
-- 顺序：macOS 先，Windows 后
 - 分发：自用/开源，不强制签名；Windows 可申请 SignPath Foundation 免费签名
 - 冷启动：留扩展位，v1 不启用、UI 不露出
 
@@ -93,8 +102,8 @@ dotnet run --project windows/src/ScanCode.App/ScanCode.App.csproj
 ## 下一步
 
 1. 你手动验收物理热键、框选、百度/夸克唤起；
-2. P1：设置页、快捷键录制、首次引导、放大镜/多码；
-3. Windows P0 已加入 `windows/`，需在 Windows 上构建验收（百度 L1、夸克 L1.5）。
+2. 多屏混合 DPI、唤起成功率的细节修正；
+3. P1：设置页、快捷键录制、首次引导、放大镜/多码。
 
 ## License
 
