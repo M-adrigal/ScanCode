@@ -149,7 +149,7 @@ public sealed class AppController : IDisposable
         var app = KnownApps.ForProvider(payload.Provider);
         var state = app == null ? AppState.NotInstalled : _registry.GetState(app);
         var window = new ResultWindow(payload, app, state);
-        window.AppSelected += selected => Dispatch(payload, selected, monitor, anchor);
+        window.AppSelected += selected => Dispatch(payload, selected);
         window.CopyRequested += () =>
         {
             ClipboardService.SetText(payload.ClipboardText);
@@ -164,7 +164,7 @@ public sealed class AppController : IDisposable
         window.ShowNear(anchor, monitor.Scale);
     }
 
-    private void Dispatch(QrPayload payload, AppDescriptor app, CapturedMonitor monitor, PixelRect anchor)
+    private void Dispatch(QrPayload payload, AppDescriptor app)
     {
         try
         {

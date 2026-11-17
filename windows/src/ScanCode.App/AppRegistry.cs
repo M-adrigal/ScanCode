@@ -25,11 +25,29 @@ public sealed class AppRegistry
         foreach (var name in app.ProcessNames)
         {
             var processes = Process.GetProcessesByName(name);
+            Process? found = null;
             foreach (var process in processes)
             {
-                if (!process.HasExited) return process;
+                if (found == null)
+                {
+                    try
+                    {
+                        if (!process.HasExited)
+                        {
+                            found = process;
+                            continue;
+                        }
+                    }
+                    catch
+                    {
+                        // 受保护/提权进程读不到状态，当作没在跑。
+                    }
+                }
+
                 process.Dispose();
             }
+
+            if (found != null) return found;
         }
         return null;
     }

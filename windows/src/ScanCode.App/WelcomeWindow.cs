@@ -23,7 +23,7 @@ public sealed class WelcomeWindow : Window
         ResizeMode = ResizeMode.NoResize;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         Title = "扫码助手";
-        Icon = LoadIcon();
+        Icon = AppIcon.Load(32);
         Background = new SolidColorBrush(Color.FromRgb(246, 247, 249));
 
         var root = new Grid { Margin = new Thickness(36, 22, 36, 22) };
@@ -34,14 +34,16 @@ public sealed class WelcomeWindow : Window
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
+        // 88 DIP 的大图用 256 帧，配合高质量缩放，避免放大发虚。
         var icon = new Image
         {
-            Source = LoadIcon(),
+            Source = AppIcon.Load(),
             Width = 88,
             Height = 88,
             HorizontalAlignment = HorizontalAlignment.Center,
             Margin = new Thickness(0, 0, 0, 8)
         };
+        RenderOptions.SetBitmapScalingMode(icon, BitmapScalingMode.HighQuality);
         Grid.SetRow(icon, 0);
         root.Children.Add(icon);
 
@@ -193,6 +195,4 @@ public sealed class WelcomeWindow : Window
         });
         return panel;
     }
-
-    private static ImageSource LoadIcon() => AppIcon.Load();
 }

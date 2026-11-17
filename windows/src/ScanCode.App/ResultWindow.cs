@@ -25,7 +25,7 @@ public sealed class ResultWindow : Window
         ShowInTaskbar = false;
         ResizeMode = ResizeMode.NoResize;
         WindowStartupLocation = WindowStartupLocation.Manual;
-        Icon = LoadIcon();
+        Icon = AppIcon.Load(32);
 
         var root = new Border
         {
@@ -43,14 +43,16 @@ public sealed class ResultWindow : Window
         header.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         header.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
+        // 24 DIP 的小图取 48 帧再高质量缩放，比直接用 16 帧清晰。
         var icon = new Image
         {
-            Source = AppIcon.Load(),
+            Source = AppIcon.Load(48),
             Width = 24,
             Height = 24,
             Margin = new Thickness(0, 3, 10, 0),
             VerticalAlignment = VerticalAlignment.Top
         };
+        RenderOptions.SetBitmapScalingMode(icon, BitmapScalingMode.HighQuality);
         Grid.SetColumn(icon, 0);
         header.Children.Add(icon);
 
@@ -185,6 +187,4 @@ public sealed class ResultWindow : Window
         AppState.NotRunning => "未打开",
         _ => "未安装"
     };
-
-    private static ImageSource LoadIcon() => AppIcon.Load();
 }

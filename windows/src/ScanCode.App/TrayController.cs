@@ -6,6 +6,7 @@ namespace ScanCode.App;
 public sealed class TrayController : IDisposable
 {
     private readonly NotifyIcon _icon;
+    private readonly Icon? _ownedIcon;
 
     public event Action? OpenRequested;
     public event Action? StartRequested;
@@ -13,14 +14,12 @@ public sealed class TrayController : IDisposable
 
     public TrayController()
     {
-        var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "AppIcon.ico");
-        var icon = File.Exists(iconPath)
-            ? new Icon(iconPath)
-            : SystemIcons.Application;
+        // 图标来自程序集内嵌资源，不依赖 exe 旁边的文件。
+        _ownedIcon = AppIcon.LoadTrayIcon();
 
         _icon = new NotifyIcon
         {
-            Icon = icon,
+            Icon = _ownedIcon ?? SystemIcons.Application,
             Text = "扫码助手",
             Visible = true
         };
@@ -41,5 +40,6 @@ public sealed class TrayController : IDisposable
     {
         _icon.Visible = false;
         _icon.Dispose();
+        _ownedIcon?.Dispose();
     }
 }

@@ -11,6 +11,11 @@ TestResults/
 windows/*.zip
 windows/*.dmg
 windows/*.exe
+windows/*.sha256
 
 # Local VM handoff archive
 /ScanCode-source.zip
+/ScanCode-windows-handoff.zip
+
+# 本地工作记录（不上传）
+/.workbuddy/

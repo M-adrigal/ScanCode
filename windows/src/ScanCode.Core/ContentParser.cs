@@ -46,13 +46,11 @@ public static partial class ContentParser
 
         var provider = DetectProvider(uri);
         var code = ExtractCode(text, uri);
+
+        // 网页链接显示完整地址；网盘链接只显示「域名 + 路径」，把 ?pwd= 之类的查询串藏起来。
         var summary = provider == Provider.Web
             ? uri.ToString()
             : uri.Host + uri.AbsolutePath;
-        if (provider != Provider.Web && !string.IsNullOrWhiteSpace(uri.Query))
-        {
-            summary = uri.Host + uri.AbsolutePath;
-        }
 
         var title = provider switch
         {

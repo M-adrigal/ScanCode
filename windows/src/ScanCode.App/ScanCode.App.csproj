@@ -12,7 +12,9 @@
     <ApplicationIcon>Assets\AppIcon.ico</ApplicationIcon>
     <Version>0.1.6</Version>
     <Authors>M-adrigal</Authors>
+    <Company>M-adrigal</Company>
     <Product>扫码助手</Product>
+    <AssemblyTitle>扫码助手</AssemblyTitle>
     <Description>Screen QR scanner for Baidu Netdisk and Quark (Windows P0)</Description>
     <!-- WPF needs the PerMonitorV2 manifest; WinForms emits a warning about this manifest setting. -->
     <NoWarn>$(NoWarn);WFO0003</NoWarn>
@@ -29,7 +31,8 @@
     <PackageReference Include="System.Drawing.Common" Version="10.0.0" />
   </ItemGroup>
 
+  <!-- 图标嵌进程序集：发布单文件 exe 时不需要外部 Assets 目录。 -->
   <ItemGroup>
-    <None Update="Assets\AppIcon.ico" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <EmbeddedResource Include="Assets\AppIcon.ico" LogicalName="ScanCode.AppIcon.ico" />
   </ItemGroup>
 </Project>
