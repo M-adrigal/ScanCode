@@ -11,6 +11,7 @@ public static class NativeMethods
     public const uint ModNoRepeat = 0x4000;
     public const uint VkQ = 0x51;
 
+    public const int SwHide = 0;
     public const int SwRestore = 9;
     public const int SwShow = 5;
     public const uint MonitorDefaultToNearest = 2;

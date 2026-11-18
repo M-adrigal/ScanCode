@@ -11,19 +11,19 @@ namespace ScanCode.Interop;
 /// </summary>
 public static class Compositor
 {
-    private const int MinimumWaitMilliseconds = 90;
+    private const int MinimumWaitMilliseconds = 120;
 
     [DllImport("dwmapi.dll")]
     private static extern int DwmFlush();
 
     /// <summary>
-    /// 等两帧合成刷新，并保证总等待不少于 <paramref name="minimumMilliseconds"/>。
-    /// 远程桌面等没有 DWM 的环境 DwmFlush 会失败，此时靠固定等待兜底。
+    /// 等合成器刷新，并保证总等待不少于 <paramref name="minimumMilliseconds"/>。
+    /// 远程桌面、虚拟机等没有 DWM 的环境 DwmFlush 会失败，此时靠固定等待兜底。
     /// </summary>
     public static void WaitForWindowsToDisappear(int minimumMilliseconds = MinimumWaitMilliseconds)
     {
         var start = Environment.TickCount64;
-        for (var i = 0; i < 2; i++)
+        for (var i = 0; i < 3; i++)
         {
             try
             {

@@ -1,4 +1,6 @@
 using System.Windows;
+using System.Windows.Interop;
+using System.Windows.Threading;
 using ScanCode.Capture;
 using ScanCode.Core;
 using ScanCode.Interop;
@@ -53,18 +55,18 @@ public sealed class AppController : IDisposable
 
     private void ShowWelcome()
     {
-        if (_welcome is { IsVisible: true })
+        // 隐藏后复用同一个窗口：重新 Show() 比重新构造更省事，也不会留下两个实例。
+        if (_welcome is { IsLoaded: true })
         {
+            _welcome.Show();
             _welcome.Activate();
             return;
         }
 
         _welcome = new WelcomeWindow(_registry);
-        _welcome.StartRequested += () =>
-        {
-            _welcome?.Close();
-            BeginCapture();
-        };
+        // 走和热键同一条路：由 BeginCapture 负责先隐藏再抓屏。这里不要 Close()，
+        // 否则窗口是被销毁而不是隐藏，既无法复用，也来不及从画面里消失。
+        _welcome.StartRequested += BeginCapture;
         _welcome.QuitRequested += Quit;
         _welcome.Closed += (_, _) => _welcome = null;
         _welcome.Show();
@@ -80,14 +82,21 @@ public sealed class AppController : IDisposable
         _capturing = true;
 
         // 和 macOS 一致：抓屏前先把自己的窗口全部藏起来。
-        // 只调 Hide() 不够——屏幕缓冲要等 DWM 下一次合成才更新，中间抓到的是旧画面，
-        // 自己的窗口就会被拍进遮罩底图，看起来像半透明的窗口挡在二维码上。
         HideOwnWindows();
         Compositor.WaitForWindowsToDisappear();
 
         try
         {
             var monitors = ScreenCaptureService.CaptureAll();
+
+            // 兜底：万一合成器还是慢半拍、把刚藏掉的窗口留在了画面里，就重抓一次。
+            for (var attempt = 0; attempt < 2 && WelcomeStillInScreenshot(monitors); attempt++)
+            {
+                Log.Write($"capture: retry attempt={attempt + 1} own window still in frame");
+                Thread.Sleep(120);
+                monitors = ScreenCaptureService.CaptureAll();
+            }
+
             var controller = new OverlayController();
             controller.SelectionConfirmed += OnSelectionConfirmed;
             controller.HotspotSelected += OnHotspotSelected;
@@ -199,11 +208,86 @@ public sealed class AppController : IDisposable
         _hud.Show();
     }
 
-    /// <summary>抓屏前收起自己所有还在屏幕上的窗口：欢迎页和提示条（结果条已由 CloseResult 关闭）。</summary>
+    /// <summary>
+    /// 抓屏前收起自己所有还在屏幕上的窗口：欢迎页和提示条（结果条已由 CloseResult 关闭）。
+    ///
+    /// 只调 Hide() 是不够的：WPF 的可见性变更要走 Dispatcher 队列，Win32 层的 SW_HIDE
+    /// 才真正下发。如果紧接着就在 UI 线程上 Sleep 或抓屏，队列没机会执行，窗口仍留在
+    /// 屏幕上，就会被拍进遮罩底图——看起来像"一个半透明的窗口压在二维码上"。
+    /// 所以这里 Hide() 之后先跑一轮消息泵，再补一刀 Win32 级的强制隐藏。
+    /// </summary>
     private void HideOwnWindows()
     {
-        _welcome?.Hide();
-        _hud?.Hide();
+        var handles = new List<IntPtr>();
+        foreach (var window in new Window?[] { _welcome, _hud })
+        {
+            if (window is not { IsLoaded: true }) continue;
+            window.Hide();
+            var handle = new WindowInteropHelper(window).Handle;
+            if (handle != IntPtr.Zero) handles.Add(handle);
+        }
+
+        PumpDispatcher();
+
+        foreach (var handle in handles)
+        {
+            if (NativeMethods.IsWindowVisible(handle)) NativeMethods.ShowWindowAsync(handle, NativeMethods.SwHide);
+        }
+
+        PumpDispatcher();
+        var stillVisible = handles.Count(h => NativeMethods.IsWindowVisible(h));
+        Log.Write($"capture: windows hidden, still visible={stillVisible}");
+    }
+
+    /// <summary>跑一轮消息泵，让排队中的可见性变更真正落到 Win32。</summary>
+    private static void PumpDispatcher()
+    {
+        // 注意：本命名空间里有个同名的 Dispatcher（负责唤起应用），这里必须写全名。
+        var frame = new DispatcherFrame();
+        System.Windows.Threading.Dispatcher.CurrentDispatcher.BeginInvoke(
+            DispatcherPriority.Background,
+            new Action(() => frame.Continue = false));
+        System.Windows.Threading.Dispatcher.PushFrame(frame);
+    }
+
+    /// <summary>
+    /// 抓到的画面里是否还留着欢迎页。用它的窗口背景色（246,247,249）判断：
+    /// 在窗口左边距内取一小区块，接近纯白且中性的就是它，壁纸和普通网页不会这么白。
+    /// </summary>
+    private bool WelcomeStillInScreenshot(IReadOnlyList<CapturedMonitor> monitors)
+    {
+        if (_welcome is not { IsLoaded: true }) return false;
+        var handle = new WindowInteropHelper(_welcome).Handle;
+        if (handle == IntPtr.Zero) return false;
+        if (!NativeMethods.GetWindowRect(handle, out var rect)) return false;
+
+        var x = rect.Left + 10;
+        var y = rect.Top + rect.Height / 2;
+
+        foreach (var monitor in monitors)
+        {
+            var bounds = monitor.Bounds;
+            var left = x - bounds.Left - 8;
+            var top = y - bounds.Top - 8;
+            var image = monitor.Image;
+            if (left < 0 || top < 0 || left + 16 > image.PixelWidth || top + 16 > image.PixelHeight) continue;
+
+            var buffer = new byte[16 * 16 * 4];
+            image.CopyPixels(new Int32Rect(left, top, 16, 16), buffer, 16 * 4, 0);
+
+            long blue = 0, green = 0, red = 0;
+            for (var i = 0; i < buffer.Length; i += 4)
+            {
+                blue += buffer[i];
+                green += buffer[i + 1];
+                red += buffer[i + 2];
+            }
+
+            const int count = 16 * 16;
+            return red / count > 232 && green / count > 232 && blue / count > 232;
+        }
+
+        return false;
     }
 
     private void CloseOverlay()
