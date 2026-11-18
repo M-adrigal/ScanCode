@@ -1,6 +1,7 @@
 using System.Windows;
 using ScanCode.Capture;
 using ScanCode.Core;
+using ScanCode.Interop;
 
 namespace ScanCode.App;
 
@@ -77,7 +78,12 @@ public sealed class AppController : IDisposable
         CloseResult();
         CloseOverlay();
         _capturing = true;
-        _welcome?.Hide();
+
+        // 和 macOS 一致：抓屏前先把自己的窗口全部藏起来。
+        // 只调 Hide() 不够——屏幕缓冲要等 DWM 下一次合成才更新，中间抓到的是旧画面，
+        // 自己的窗口就会被拍进遮罩底图，看起来像半透明的窗口挡在二维码上。
+        HideOwnWindows();
+        Compositor.WaitForWindowsToDisappear();
 
         try
         {
@@ -191,6 +197,13 @@ public sealed class AppController : IDisposable
         _hud = new HudWindow(message);
         _hud.Closed += (_, _) => _hud = null;
         _hud.Show();
+    }
+
+    /// <summary>抓屏前收起自己所有还在屏幕上的窗口：欢迎页和提示条（结果条已由 CloseResult 关闭）。</summary>
+    private void HideOwnWindows()
+    {
+        _welcome?.Hide();
+        _hud?.Hide();
     }
 
     private void CloseOverlay()

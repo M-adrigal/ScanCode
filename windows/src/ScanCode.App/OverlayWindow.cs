@@ -17,6 +17,7 @@ public sealed class OverlayWindow : Window
     public event Action? Cancelled;
 
     private readonly Canvas _canvas = new();
+    private readonly System.Windows.Shapes.Path _dim;
     private readonly Border _selectionBorder;
     private readonly Border _sizeBadge;
     private readonly TextBlock _sizeText;
@@ -57,11 +58,15 @@ public sealed class OverlayWindow : Window
             IsHitTestVisible = false
         });
 
-        root.Children.Add(new Rectangle
+        // 和 macOS 一致：整屏压暗 56%，但框选区域挖空保持原亮度，
+        // 这样拖动时能看清二维码本身，不会被压暗层挡住。
+        _dim = new System.Windows.Shapes.Path
         {
-            Fill = new SolidColorBrush(Color.FromArgb(108, 0, 0, 0)),
+            Fill = new SolidColorBrush(Color.FromArgb(143, 0, 0, 0)),
             IsHitTestVisible = false
-        });
+        };
+        root.Children.Add(_dim);
+        UpdateDimHole(null);
 
         _canvas.Background = Brushes.Transparent;
         root.Children.Add(_canvas);
@@ -158,6 +163,8 @@ public sealed class OverlayWindow : Window
             Focus();
             Keyboard.Focus(this);
         };
+        SizeChanged += (_, _) =>
+            UpdateDimHole(_selectionBorder.Visibility == Visibility.Visible ? _selectionDip : null);
     }
 
     private void OnMouseDown(object sender, MouseButtonEventArgs e)
@@ -167,9 +174,7 @@ public sealed class OverlayWindow : Window
 
         _start = e.GetPosition(_canvas);
         _dragging = true;
-        _selectionBorder.Visibility = Visibility.Collapsed;
-        _sizeBadge.Visibility = Visibility.Collapsed;
-        _confirm.Visibility = Visibility.Collapsed;
+        ClearSelection();
         _hint.Text = "拖动框选二维码　·　Esc 取消";
         CaptureMouse();
     }
@@ -191,9 +196,7 @@ public sealed class OverlayWindow : Window
         var rect = ClampRect(new Rect(_start, current));
         if (rect.Width < 10 || rect.Height < 10)
         {
-            _selectionBorder.Visibility = Visibility.Collapsed;
-            _sizeBadge.Visibility = Visibility.Collapsed;
-            _confirm.Visibility = Visibility.Collapsed;
+            ClearSelection();
             return;
         }
 
@@ -218,6 +221,33 @@ public sealed class OverlayWindow : Window
         _sizeText.Text = $"{(int)(rect.Width * Monitor.Scale)} × {(int)(rect.Height * Monitor.Scale)}";
         Canvas.SetLeft(_sizeBadge, Math.Max(4, rect.X));
         Canvas.SetTop(_sizeBadge, Math.Max(4, rect.Y - 28));
+
+        UpdateDimHole(rect);
+    }
+
+    /// <summary>整屏压暗，框选区域用 even-odd 挖空；hole 为空表示整屏都压暗。</summary>
+    private void UpdateDimHole(Rect? hole)
+    {
+        var width = ActualWidth > 0 ? ActualWidth : Width;
+        var height = ActualHeight > 0 ? ActualHeight : Height;
+        if (double.IsNaN(width) || double.IsNaN(height) || width <= 0 || height <= 0) return;
+
+        var geometry = new GeometryGroup { FillRule = FillRule.EvenOdd };
+        geometry.Children.Add(new RectangleGeometry(new Rect(0, 0, width, height)));
+        if (hole is { Width: > 0, Height: > 0 } rect)
+        {
+            geometry.Children.Add(new RectangleGeometry(rect));
+        }
+        geometry.Freeze();
+        _dim.Data = geometry;
+    }
+
+    private void ClearSelection()
+    {
+        _selectionBorder.Visibility = Visibility.Collapsed;
+        _sizeBadge.Visibility = Visibility.Collapsed;
+        _confirm.Visibility = Visibility.Collapsed;
+        UpdateDimHole(null);
     }
 
     private void ConfirmSelection()
